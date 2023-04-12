@@ -10,9 +10,9 @@ public class DesktopLauncher {
 		Lwjgl3ApplicationConfiguration config = new Lwjgl3ApplicationConfiguration();
 		config.setForegroundFPS(60);
 		config.setTitle("CritterHop");
-		config.setWindowSizeLimits(700, 700, 700, 700);
+//		config.setWindowSizeLimits(700, 700, 700, 700);
 		config.setResizable(false);
-		config.setWindowedMode(700,700);
+		config.setWindowedMode(750,750);
 		new Lwjgl3Application(new Main(), config);
 	}
 }

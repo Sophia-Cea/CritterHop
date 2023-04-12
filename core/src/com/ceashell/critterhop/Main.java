@@ -1,5 +1,7 @@
 package com.ceashell.critterhop;
 
+//note to self: dave ramsey on 7 baby steps for super savings
+
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
@@ -13,23 +15,29 @@ import java.util.ArrayList;
 // establish states √
 // make main class run the states √
 // set up basic grid and rendering √
-// set up critter class
-// add lava and landing pad (water?)
-// set up basic level and make controls
-// set up level editing
+// set up critter class √
+// add lava and landing pad (water?) √
+// set up basic level and make controls √
+// make stuff clear when you match stuff √
+// add gravity, decide later whether to use or not √
+// add critter behavior √
+// add level select √
+// make levels you havent done yet locked √
+// ********
 // add a save file somewhere in here
-// add critter behavior
+// make critter path find
+// add UI like buttons n shit to switch between states
 // add game over
-// add level select
-// make levels you havent done yet locked
+// move the platform UNDER the grid instead of inside it.
 // add menu screen
 // make a bunch of levels
 // add polish: animations, something cute when you finish a level, particles, background animation, moosic
 
 public class Main extends ApplicationAdapter {
-	StateManager stateManager;
-//	array of 2d arrays of integer. is there better way?
-	ArrayList<Level> levels;
+	public static StateManager stateManager;
+	public static int level;
+	public static ArrayList<Level> levels;
+	public static ArrayList<Boolean> levelsUnlocked;
 	public static int WIDTH;
 	public static int HEIGHT;
 	
@@ -38,23 +46,45 @@ public class Main extends ApplicationAdapter {
 		WIDTH = Gdx.graphics.getWidth();
 		HEIGHT = Gdx.graphics.getHeight();
 		stateManager = new StateManager();
-		levels = new ArrayList<Level>();
+		levels = new ArrayList();
+		levelsUnlocked = new ArrayList();
 		MakeAllTheLevels();
 		//	maybe pass in a critter...? probz not, worth a thought tho
-		stateManager.push(new PlayState(levels));
+		stateManager.push(new PlayState());
+//		stateManager.push(new LevelSelectState());
 	}
 
 	public void MakeAllTheLevels() {
 		levels.add(new Level( new int[][]
 				{
-						{0, 0, 0, 0, 0, 0},
-						{0, 0, 0, 0, 0, 0},
-						{0, 1, 1, 0, 0, 0},
-						{0, 1, 1, 0, 0, 0},
-						{0, 0, 0, 0, 0, 0},
-						{0, 0, 0, 0, 2, 2}
+						{0, 0, 0, 0, 0, 0, 0, 0},
+						{0, 0, 0, 0, 0, 0, 0, 0},
+						{0, 0, 1, 1, 0, 0, 0, 0},
+						{0, 0, 1, 1, 0, 0, 0, 0},
+						{0, 0, 0, 0, 0, 0, 0, 0},
+						{0, 0, 0, 0, 0, 0, 0, 0},
+						{0, 0, 0, 0, 0, 0, 0, 0},
+						{1, 1, 1, 1, 1, 2, 2, 1}
 				}
 		));
+		levels.add(new Level( new int[][]
+				{
+						{0,0,0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,1,1,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0,0,0},
+						{0,0,1,1,0,0,0,0,0,0,0,0},
+						{0,0,1,1,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,1,1,0,0},
+						{0,0,0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0,0,0},
+						{0,0,0,0,1,1,0,0,0,0,0,0},
+						{0,0,0,0,0,0,0,0,0,0,0,0},
+						{1,1,1,1,2,2,2,1,1,1,1,1}
+				}
+				));
+		levelsUnlocked.add(true);
+		levelsUnlocked.add(false);
 	}
 
 	@Override
@@ -72,4 +102,16 @@ public class Main extends ApplicationAdapter {
 //		batch.dispose();
 //		img.dispose();
 	}
+
+//	TODO: sprites
+//	background for gameplay
+//  level select icons
+//  background for level select state
+//  buttons for ui
+//  animations for critter
+//  border(s)
+//  menu screen bg and text..?
+//  game over bg
+//  lava
+//  landing pad.
 }
