@@ -9,9 +9,9 @@ public class LavaTile extends Tile {
 //    TextureRegion[] lavas;
     Animation[] lavas;
     int tileType;
-    static float cycleTime = 4;
-    static Animation lavaAnimation1 = new Animation(new TextureRegion(new Texture("lava_and_platform.png"), 0,0, 24,12), 2, cycleTime);
-    static Animation lavaAnimation2 = new Animation(new TextureRegion(new Texture("lava_and_platform.png"), 24,0, 24,12), 2, cycleTime);
+    static float cycleTime = 2;
+    Animation lavaAnimation1 = new Animation(new TextureRegion(new Texture("lava_and_platform.png"), 0,0, 24,12), 2, cycleTime);
+    Animation lavaAnimation2 = new Animation(new TextureRegion(new Texture("lava_and_platform.png"), 24,0, 24,12), 2, cycleTime);
     Animation animation;
     public LavaTile(int lavaType, int gridPosX, int gridPosY, int margin, int yMargin, double tileSize) {
         super(lavaType, gridPosX, gridPosY, margin, yMargin, tileSize);
