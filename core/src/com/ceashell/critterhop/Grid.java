@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.sun.org.apache.bcel.internal.generic.LADD;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -32,31 +31,15 @@ public class Grid {
     int tileSize;
     final int margin = 140;
     final int yMargin = 213;
-//    Color[] colors;
     double[] mousePos1;
     double[] mousePos2;
-//    boolean switched;
-//    Texture tileTexture;
-//    TextureRegion[] tiles;
-//    Texture lavaAndPlatform = new Texture("lava_and_platform.png");
-//    TextureRegion[] lava;
-//    TextureRegion[] platform;
-//    Texture border;
+
     public Grid(Level currentLevel) {
-//        gridArray = currentLevel.levelGrid;
         tileGrid = new Tile[currentLevel.levelGrid.length][currentLevel.levelGrid[0].length];
         swipeParticles = new ArrayList();
         tileSize = ((WIDTH - margin*2)/currentLevel.levelGrid.length);
-//        colors = new Color[]{Color.WHITE, Color.SCARLET, Color.GRAY,Color.LIME, Color.BLUE, Color.GREEN, Color.YELLOW, Color.CYAN, Color.MAGENTA, Color.ORANGE};
-//        tileTexture = new Texture("tiles.png");
-//        tiles = new TextureRegion[]{new TextureRegion(tileTexture, 0, 0, 12, 12), new TextureRegion(tileTexture, 12, 0, 12, 12), new TextureRegion(tileTexture, 24, 0, 12, 12), new TextureRegion(tileTexture, 36, 0, 12, 12), new TextureRegion(tileTexture, 48, 0, 12, 12), new TextureRegion(tileTexture, 60, 0, 12, 12), new TextureRegion(tileTexture, 72, 0, 12, 12)};
-//        border = new Texture("border1.png");
-//        lava = new TextureRegion[] {new TextureRegion(lavaAndPlatform, 0, 0, 12,12), new TextureRegion(lavaAndPlatform, 12, 0, 12, 12)};
-//        platform = new TextureRegion[] {new TextureRegion(lavaAndPlatform, 24, 0, 12,12), new TextureRegion(lavaAndPlatform, 36, 0, 12,12), new TextureRegion(lavaAndPlatform, 48, 0, 12, 12)};
-//        tiles = new ArrayList<Tile>();
         for (int i=0; i<currentLevel.levelGrid.length; i++) {
             for (int j=0; j<currentLevel.levelGrid[0].length; j++) {
-//                gridRects[i][j] = new Rectangle(2+(int)(margin + j * tileSize), (int)(HEIGHT - tileSize - (yMargin + i * tileSize)), (int)(tileSize+1), (int)(tileSize+1));
 //                can be improved by making a thingy to check if the i,j is in bound, if so return type, if not return -1.
                 if (currentLevel.levelGrid[i][j] == 1) {
                     if (i>0 && currentLevel.levelGrid[i-1][j] != 1) {
@@ -92,13 +75,6 @@ public class Grid {
                 }
             }
         }
-//        System.out.println();
-//        for (int i=0; i<tiles.size(); i++) {
-//            if (tiles.get(i) instanceof GridTile) {
-//                System.out.println(tiles.get(i).tileType);
-//            }
-//        }
-//        printTileGrid();
         clearBoardFromMatches();
 //        printTileGrid();
     }
@@ -269,6 +245,7 @@ public class Grid {
     }
 
     public void update() {
+        System.out.println(checkFallingTiles());
         mousePos2 = new double[]{Gdx.input.getX(), Gdx.input.getY()};
         for (int i=0; i<swipeParticles.size(); i++) {
             if (swipeParticles.get(i).particleDone()) {
@@ -277,13 +254,30 @@ public class Grid {
         }
         for (int i=0; i<tileGrid.length; i++) {
             for (int j=0; j<tileGrid[0].length; j++) {
-                if (tileGrid[i][j] instanceof GridTile || tileGrid[i][j] instanceof LavaTile) {
+                if (tileGrid[i][j] instanceof GridTile) {
+                    (tileGrid[i][j]).update();
+                    if (((GridTile) tileGrid[i][j]).finishedTransitioning) {
+                        switchTiles(i, j, ((GridTile) tileGrid[i][j]).intendedGridPosI, ((GridTile) tileGrid[i][j]).intendedGridPosJ);
+                    }
+                } else if (tileGrid[i][j] instanceof LavaTile) {
                     (tileGrid[i][j]).update();
                 }
             }
         }
         updateTilePositions();
 //        printTileGrid();
+    }
+
+    public void switchTiles(int i1, int j1, int i2, int j2) {
+        GridTile temp = (GridTile) tileGrid[i1][j1];
+        tileGrid[i1][j1] = tileGrid[i2][j2];
+        tileGrid[i2][j2] = temp;
+        ((GridTile) tileGrid[i1][j1]).finishedTransitioning = false;
+        ((GridTile) tileGrid[i2][j2]).finishedTransitioning = false;
+        ((GridTile) tileGrid[i1][j1]).GridPosX = ((GridTile) tileGrid[i1][j1]).intendedGridPosJ;
+        ((GridTile) tileGrid[i2][j2]).GridPosX = ((GridTile) tileGrid[i2][j2]).intendedGridPosJ;
+        ((GridTile) tileGrid[i1][j1]).GridPosY = ((GridTile) tileGrid[i1][j1]).intendedGridPosI;
+        ((GridTile) tileGrid[i2][j2]).GridPosY = ((GridTile) tileGrid[i2][j2]).intendedGridPosI;
     }
 
     public void updateTilePositions() {
@@ -300,6 +294,17 @@ public class Grid {
                 tileGrid[i][j].GridPosY = i;
             }
         }
+    }
+
+    public boolean checkFallingTiles() {
+        for (int i=1; i<tileGrid.length-1; i++) {
+            for (int j=0; j<tileGrid[0].length; j++) {
+                if (tileGrid[i][j].tileType == -1 && tileGrid[i-1][j].tileType != -1) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 
     public void dropFloatingTiles() {
@@ -321,6 +326,7 @@ public class Grid {
         if (Gdx.input.justTouched()) {
             mousePos1 = new double[]{Gdx.input.getX(), Gdx.input.getY()};
             int[] gridPos = pixelsToGridPos(mousePos1);
+            printTileGrid();
         }
         if (Gdx.input.isTouched() && isInGridBounds(mousePos1)) {
             swipeParticles.add(new SwipeParticle((int)mousePos2[0], HEIGHT-(int)mousePos2[1]));
@@ -329,7 +335,7 @@ public class Grid {
             if (mousePos1 != null && mousePos2 != null) {
                 if (mousePos1[1] - mousePos2[1] < -15) {
 //                    System.out.println("down swipe");
-                    if (tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]] instanceof GridTile && mouseInGridCoords[0]+1 < tileGrid.length) {
+                    if (tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]] instanceof GridTile && tileGrid[mouseInGridCoords[0] + 1][mouseInGridCoords[1]] instanceof GridTile && mouseInGridCoords[0]+1 < tileGrid.length) {
 //                        System.out.println("tru");
                         ((GridTile) tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]]).switchTiles((GridTile) tileGrid[mouseInGridCoords[0] + 1][mouseInGridCoords[1]]);
                     }
@@ -340,18 +346,18 @@ public class Grid {
 //                    }
                 } else if (mousePos1[1] - mousePos2[1] > 15) {
 //                    System.out.println("up swipe");
-                    if (tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]] instanceof GridTile && mouseInGridCoords[0]-1 >= 0) {
+                    if (tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]] instanceof GridTile && tileGrid[mouseInGridCoords[0] - 1][mouseInGridCoords[1]] instanceof GridTile && mouseInGridCoords[0]-1 >= 0) {
                         ((GridTile) tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]]).switchTiles((GridTile) tileGrid[mouseInGridCoords[0] - 1][mouseInGridCoords[1]]);
                     }
                 }
                 if (mousePos1[0] - mousePos2[0] < -15) {
 //                    System.out.println("right swipe");
-                    if (tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]] instanceof GridTile && mouseInGridCoords[1]+1 < tileGrid[0].length) {
+                    if (tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]] instanceof GridTile && tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1] + 1] instanceof GridTile && mouseInGridCoords[1]+1 < tileGrid[0].length) {
                         ((GridTile) tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]]).switchTiles((GridTile) tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]+1]);
                     }
                 } else if (mousePos1[0] - mousePos2[0] > 15) {
 //                    System.out.println("left swipe");
-                    if (tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]] instanceof GridTile && mouseInGridCoords[1]-1 > 0) {
+                    if (tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]] instanceof GridTile && tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]-1] instanceof GridTile && mouseInGridCoords[1]-1 > 0) {
                         ((GridTile) tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]]).switchTiles((GridTile) tileGrid[mouseInGridCoords[0]][mouseInGridCoords[1]-1]);
                     }
                 }

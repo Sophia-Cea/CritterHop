@@ -32,32 +32,34 @@ public class Critter {
 
     public void update(Grid grid) {
         fishFlop.update(Gdx.graphics.getDeltaTime());
-        if (posInArray[0] < grid.tileGrid.length-1) {
-            if (grid.tileGrid[posInArray[0] + 1][posInArray[1]].tileType == -1 && grid.tileGrid[posInArray[0] + 1][posInArray[1]] instanceof GridTile) {
-                if (posInArray[0] < grid.tileGrid.length - 1) {
-                    posInArray[0] += 1;
-                }
-            } else {
-                int nearestZeroInRow = grid.findClosestZeroInRow(posInArray[0]+1, posInArray[1]);
-                if (nearestZeroInRow >= 0) {
-                    posInArray[0] += 1;
-                    posInArray[1] = nearestZeroInRow;
+        if (!grid.checkFallingTiles()) {
+            if (posInArray[0] < grid.tileGrid.length - 1) {
+                if (grid.tileGrid[posInArray[0] + 1][posInArray[1]].tileType == -1 && grid.tileGrid[posInArray[0] + 1][posInArray[1]] instanceof GridTile) {
+                    if (posInArray[0] < grid.tileGrid.length - 1) {
+                        posInArray[0] += 1;
+                    }
+                } else {
+                    int nearestZeroInRow = grid.findClosestZeroInRow(posInArray[0] + 1, posInArray[1]);
+                    if (nearestZeroInRow >= 0) {
+                        posInArray[0] += 1;
+                        posInArray[1] = nearestZeroInRow;
+                    }
                 }
             }
-        }
-        if (posInArray[0] > -1 && posInArray[0] < grid.tileGrid.length-1) {
-            if (grid.tileGrid[posInArray[0]+1][posInArray[1]] instanceof LavaTile) {
+            if (posInArray[0] > -1 && posInArray[0] < grid.tileGrid.length - 1) {
+                if (grid.tileGrid[posInArray[0] + 1][posInArray[1]] instanceof LavaTile) {
+                    stateManager.push(new GameOverState());
+                }
+                if (grid.tileGrid[posInArray[0] + 1][posInArray[1]] instanceof PlatformTile) {
+                    if (level < levels.size() - 1) {
+                        level++;
+                    }
+                    stateManager.push(new YouWinState());
+                }
+            }
+            if (posInArray[0] > -1 && grid.tileGrid[posInArray[0]][posInArray[1]].tileType != -1) { //checks if he was squshed by a tile :/
                 stateManager.push(new GameOverState());
             }
-            if (grid.tileGrid[posInArray[0]+1][posInArray[1]] instanceof PlatformTile) {
-                if (level < levels.size()-1) {
-                    level++;
-                }
-                stateManager.push(new YouWinState());
-            }
-        }
-        if (posInArray[0] > -1 && grid.tileGrid[posInArray[0]][posInArray[1]].tileType != -1) { //checks if he was squshed by a tile :/
-            stateManager.push(new GameOverState());
         }
 
     }
